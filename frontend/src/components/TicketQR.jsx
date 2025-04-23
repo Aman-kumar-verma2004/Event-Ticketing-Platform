@@ -1,4 +1,4 @@
-import QRCode from 'qrcode.react'
+import QRCode from "react-qr-code";
 
 const TicketQR = ({ ticketId }) => {
   return (
