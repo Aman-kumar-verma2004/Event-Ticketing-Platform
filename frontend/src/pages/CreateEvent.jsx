@@ -11,10 +11,14 @@ const CreateEvent = () => {
     e.preventDefault()
     const res = await fetch('http://localhost:5000/api/events', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
       body: JSON.stringify({ title, description, date }),
     })
     if (res.ok) {
+      alert("Event created Successfully")
       navigate('/dashboard')
     } else {
       alert('Failed to create event')
