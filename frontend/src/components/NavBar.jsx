@@ -115,6 +115,14 @@ const Navbar = () => {
             >
               My Tickets
             </NavLink>
+            <NavLink
+              to="/all-events"
+              className={({ isActive }) =>
+                isActive ? 'text-yellow-300 font-semibold ' : 'hover:text-gray-300'
+              }
+            >
+              All Events
+            </NavLink>
             <button
               onClick={handleLogout}
               className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-blue-100 transition"
@@ -132,14 +140,7 @@ const Navbar = () => {
             >
               Home
             </NavLink>
-            <NavLink
-              to="/all-events"
-              className={({ isActive }) =>
-                isActive ? 'text-yellow-300 font-semibold ' : 'hover:text-gray-300'
-              }
-            >
-              All Events
-            </NavLink>
+            
             <NavLink
               to="/login"
               className={({ isActive }) =>

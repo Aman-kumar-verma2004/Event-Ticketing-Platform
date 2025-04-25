@@ -1,48 +1,35 @@
-const Ticket = require('../models/Ticket');
-const { v4: uuidv4 } = require('uuid');
+const Ticket = require('../models/Ticket')
+const { v4: uuidv4 } = require('uuid')
 
-const generateTicket = async (req, res) => {
-  const { id: eventId } = req.params;
-  const userId = req.user.id;
-  const ticketId = uuidv4();
-
-  try {
-    const ticket = await Ticket.create({ ticketId, eventId, userId });
-    res.json({ ticketId });
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to generate ticket', error: err.message });
-  }
-};
-
-const getUserTickets = async (req, res) => {
-  try {
-    const tickets = await Ticket.find({ userId: req.user.id }).populate('eventId');
-    res.json(tickets);
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to fetch tickets', error: err.message });
-  }
-};
-
-const validateTicket = async (req, res) => {
-  const { ticketId } = req.params;
+exports.generateTicket = async (req, res) => {
+  const { id: eventId } = req.params
+  const userId = req.user._id
 
   try {
-    const ticket = await Ticket.findOne({ ticketId });
+    // Prevent duplicate ticket for same user & event
+    const alreadyExists = await Ticket.findOne({ event: eventId, user: userId })
+    if (alreadyExists) {
+      return res.status(400).json({ message: 'Ticket already generated for this event' })
+    }
 
-    if (!ticket) return res.status(404).json({ message: 'Invalid ticket' });
-    if (ticket.isUsed) return res.status(400).json({ message: 'Ticket already used' });
+    const ticket = await Ticket.create({
+      event: eventId,
+      user: userId,
+      ticketId: uuidv4(),
+    })
 
-    ticket.isUsed = true;
-    await ticket.save();
-
-    res.json({ message: 'Ticket validated successfully' });
+    res.status(201).json({ ticket })
   } catch (err) {
-    res.status(500).json({ message: 'Ticket validation failed', error: err.message });
+    console.error(err)
+    res.status(500).json({ message: 'Failed to generate ticket' })
   }
-};
+}
 
-module.exports = {
-  generateTicket,
-  getUserTickets,
-  validateTicket,
-};
+exports.getUserTickets = async (req, res) => {
+  try {
+    const tickets = await Ticket.find({ user: req.user._id }).populate('event')
+    res.json(tickets)
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to load your tickets' })
+  }
+}

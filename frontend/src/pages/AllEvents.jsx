@@ -1,25 +1,54 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 const AllEvents = () => {
   const [events, setEvents] = useState([])
+  const [enrolledEvents, setEnrolledEvents] = useState([])
   const { user } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const res = await fetch('http://localhost:5000/api/events/all')
-        const data = await res.json()
-        setEvents(data)
-      } catch (err) {
-        console.error('Error fetching events:', err)
-      }
+  const fetchEvents = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/events/all')
+      const data = await res.json()
+      setEvents(data)
+    } catch (err) {
+      console.error('Error fetching events:', err)
     }
+  }
 
+  const fetchEnrolledEvents = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/tickets/my-events', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      const data = await res.json()
+      setEnrolledEvents(data)
+    } catch (err) {
+      console.error('Error fetching enrolled events:', err)
+    }
+  }
+
+  // Initial fetch
+  useEffect(() => {
     fetchEvents()
-  }, [])
+    if (user) {
+      fetchEnrolledEvents()
+    }
+  }, [user])
+
+  // Re-fetch if redirected after event creation
+  useEffect(() => {
+    if (location.state?.newEvent) {
+      fetchEvents()
+      if (user) fetchEnrolledEvents()
+      window.history.replaceState({}, document.title)
+    }
+  }, [location.state])
 
   const handleEnroll = async (eventId) => {
     if (!user) {
@@ -40,7 +69,8 @@ const AllEvents = () => {
 
       if (res.ok) {
         alert('Ticket generated successfully!')
-        navigate('/my-ticket') // or show QR code instantly
+        setEnrolledEvents(prev => [...prev, eventId]) // Update enrolled state
+        navigate('/my-ticket')
       } else {
         alert(data.message || 'Enrollment failed.')
       }
@@ -60,12 +90,16 @@ const AllEvents = () => {
               <h3 className="text-lg font-semibold text-blue-700">{event.title}</h3>
               <p className="text-sm text-gray-600 mb-2">{event.description}</p>
               <p className="text-sm text-gray-500 mb-3">📅 {new Date(event.date).toLocaleDateString()}</p>
-              <button
-                onClick={() => handleEnroll(event._id)}
-                className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
-              >
-                Enroll
-              </button>
+              {enrolledEvents.includes(event._id) ? (
+                <span className="text-green-600 font-medium">✅ Enrolled</span>
+              ) : (
+                <button
+                  onClick={() => handleEnroll(event._id)}
+                  className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+                >
+                  Enroll
+                </button>
+              )}
             </div>
           ))
         ) : (
