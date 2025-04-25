@@ -10,7 +10,7 @@ import MyTicket from './pages/MyTicket'
 import PrivateRoute from './components/PrivateRoute'
 import Landing from './pages/Landing'
 import AllEvents from './pages/AllEvents'
-
+import VerifyTicketPage from './pages/VerifyTicketpage'
 function App() {
   return (
     <BrowserRouter>
@@ -20,7 +20,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/all-events" element={<AllEvents />} />
-
+        <Route path="/scan/:ticketId" element={<VerifyTicketPage />} />
         <Route path="/dashboard" element={
           <PrivateRoute>
             <Dashboard />

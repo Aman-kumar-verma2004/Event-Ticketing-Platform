@@ -32,7 +32,8 @@ const MyTicket = () => {
             <h3 className="text-lg font-semibold text-blue-700">{ticket.event.title}</h3>
             <p className="text-sm text-gray-600">{ticket.event.description}</p>
             <p className="text-sm text-gray-500 mb-2">Date: {new Date(ticket.event.date).toLocaleDateString()}</p>
-            <QRCode value={ticket.ticketId} size={128} />
+            <QRCode value={`http://localhost:5173/scan/${ticket.ticketId}`} />
+
 
           </div>
         ))}

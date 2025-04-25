@@ -99,6 +99,14 @@ const Navbar = () => {
       <div className="space-x-4">
         {user ? (
           <>
+          <NavLink
+              to="/dashboard"
+              className={({ isActive }) =>
+                isActive ? 'text-yellow-300 font-semibold ' : 'hover:text-gray-300'
+              }
+            >
+              DashBoard
+            </NavLink>
             <NavLink
               to="/create-event"
               className={({ isActive }) =>
